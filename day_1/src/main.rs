@@ -33,8 +33,8 @@ fn process_data(input: &str) -> TestData {
 fn part_one_solution((left, right): &TestData) -> u32 {
     let mut sorted_left = left.clone();
     let mut sorted_right = right.clone();
-    sorted_left.sort();
-    sorted_right.sort();
+    sorted_left.sort_unstable();
+    sorted_right.sort_unstable();
 
     zip(sorted_left, sorted_right)
         .map(|(a, b)| a.abs_diff(b))
@@ -85,5 +85,10 @@ mod test_super {
     #[test]
     fn test_part_two_example() {
         assert_eq!(part_two_solution(&example_data()), 31);
+    }
+
+    #[test]
+    fn test_part_two_solution() {
+        assert_eq!(part_two_solution(&puzzle_data()), 23529853);
     }
 }
