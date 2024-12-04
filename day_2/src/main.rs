@@ -3,6 +3,9 @@ fn main() {
 
     let part_one_answer = part_one_solution(&data);
     println!("The Part One answer is {part_one_answer}");
+
+    let part_two_answer = part_two_solution(&data);
+    println!("The Part Two answer is {part_two_answer}");
 }
 
 fn process_data(input: &str) -> Vec<Vec<i32>> {
@@ -19,6 +22,28 @@ fn process_data(input: &str) -> Vec<Vec<i32>> {
 fn part_one_solution(data: &[Vec<i32>]) -> u32 {
     data.iter()
         .map(|report| if report_is_safe(report) { 1 } else { 0 })
+        .sum()
+}
+
+fn part_two_solution(data: &[Vec<i32>]) -> u32 {
+    // 347 is too low
+
+    data.iter()
+        .map(|report| {
+            if report_is_safe(report) {
+                1
+            } else {
+                for i in 0..(report.len()) {
+                    let mut dampened = report.clone();
+                    dampened.remove(i);
+                    if report_is_safe(&dampened) {
+                        return 1;
+                    }
+                }
+
+                0
+            }
+        })
         .sum()
 }
 
@@ -58,17 +83,17 @@ fn report_is_safe(report: &[i32]) -> bool {
 mod test_super {
     use super::*;
 
-    fn part_one_example_data() -> Vec<Vec<i32>> {
+    fn example_data() -> Vec<Vec<i32>> {
         process_data(include_str!("../data/test_input.txt"))
     }
 
-    fn part_one_puzzle_data() -> Vec<Vec<i32>> {
+    fn puzzle_data() -> Vec<Vec<i32>> {
         process_data(include_str!("../data/puzzle_input.txt"))
     }
 
     #[test]
     fn test_part_one_example() {
-        assert_eq!(part_one_solution(&part_one_example_data()), 2);
+        assert_eq!(part_one_solution(&example_data()), 2);
     }
 
     #[test]
@@ -83,6 +108,16 @@ mod test_super {
 
     #[test]
     fn test_part_one_answer() {
-        assert_eq!(part_one_solution(&part_one_puzzle_data()), 299);
+        assert_eq!(part_one_solution(&puzzle_data()), 299);
+    }
+
+    #[test]
+    fn test_part_two_example() {
+        assert_eq!(part_two_solution(&example_data()), 4);
+    }
+
+    #[test]
+    fn test_part_two_answer() {
+        assert_eq!(part_two_solution(&puzzle_data()), 364);
     }
 }
