@@ -21,6 +21,22 @@ jobs:
           name: "Cargo test"
           command: "cargo test"
           working_directory: << parameters.directory >>
+  lint:
+    docker:
+      - image: rust:1.81
+    parameters:
+      directory:
+        type: string
+    steps:
+      - checkout
+      - run:
+          name: "Install clippy"
+          command: "rustup component add clippy"
+          working_directory: << parameters.directory >>
+      - run:
+          name: "Lint"
+          command: "cargo clippy --no-deps -- -Dwarnings"
+          working_directory: << parameters.directory >>
 
 workflows:
   day_1:
@@ -28,8 +44,12 @@ workflows:
     jobs:
       - test:
           directory: day_1
+      - lint:
+          directory: day_1
   day_2:
     when: << pipeline.parameters.day_2 >>
     jobs:
     - test:
         directory: day_2
+    - lint:
+          directory: day_2
