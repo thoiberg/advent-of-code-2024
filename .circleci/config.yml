@@ -17,3 +17,4 @@ workflows:
           mapping: |
             day_1/.+ day_1 true
             day_2/.+ day_2 true 
+            day_03/.+ day_3 true 
