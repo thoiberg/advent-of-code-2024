@@ -15,17 +15,12 @@ fn part_one_solution(data: &[(u32, u32)]) -> u32 {
 fn process_data(input: &str) -> Vec<(u32, u32)> {
     let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
 
-    input
-        .lines()
-        .flat_map(|line| {
-            re.captures_iter(line)
-                .map(|caps| {
-                    let (_, [a, b]) = caps.extract();
-                    (a.parse::<u32>().unwrap(), b.parse::<u32>().unwrap())
-                })
-                .collect::<Vec<(u32, u32)>>()
+    re.captures_iter(input)
+        .map(|caps| {
+            let (_, [a, b]) = caps.extract();
+            (a.parse::<u32>().unwrap(), b.parse::<u32>().unwrap())
         })
-        .collect()
+        .collect::<Vec<(u32, u32)>>()
 }
 
 #[cfg(test)]
