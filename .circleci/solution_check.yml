@@ -46,16 +46,16 @@ workflows:
     when: << pipeline.parameters.day_1 >>
     jobs:
       - test:
-          directory: day_1
+          directory: day_01
       - lint:
-          directory: day_1
+          directory: day_01
   day_2:
     when: << pipeline.parameters.day_2 >>
     jobs:
     - test:
-        directory: day_2
+        directory: day_02
     - lint:
-          directory: day_2
+          directory: day_02
   day_3:
     when: << pipeline.parameters.day_3 >>
     jobs:
