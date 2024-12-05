@@ -8,29 +8,22 @@ fn main() {
     println!("Part One Answer is: {part_one_answer}");
 }
 
-fn part_one_solution(data: &[String]) -> u32 {
-    data.iter()
-        .map(|instruction| {
-            let chars: Vec<char> = instruction.chars().collect();
-            let num_string: String = (chars[4..chars.len() - 1]).iter().cloned().collect();
-            let vals: Vec<_> = num_string
-                .split(',')
-                .map(|f| f.parse::<u32>().unwrap())
-                .collect();
-
-            vals[0] * vals[1]
-        })
-        .sum()
+fn part_one_solution(data: &[(u32, u32)]) -> u32 {
+    data.iter().map(|(a, b)| a * b).sum()
 }
 
-fn process_data(input: &str) -> Vec<String> {
-    let re = Regex::new(r"(mul\(\d{1,3},\d{1,3}\))").unwrap();
+fn process_data(input: &str) -> Vec<(u32, u32)> {
+    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
+
     input
         .lines()
         .flat_map(|line| {
-            re.find_iter(line)
-                .map(|m| m.as_str().to_owned())
-                .collect::<Vec<String>>()
+            re.captures_iter(line)
+                .map(|caps| {
+                    let (_, [a, b]) = caps.extract();
+                    (a.parse::<u32>().unwrap(), b.parse::<u32>().unwrap())
+                })
+                .collect::<Vec<(u32, u32)>>()
         })
         .collect()
 }
@@ -39,22 +32,24 @@ fn process_data(input: &str) -> Vec<String> {
 mod test_super {
     use super::*;
 
+    fn part_one_example_data() -> String {
+        String::from("xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))")
+    }
+
     #[test]
     fn test_process_data_finds_all_instances() {
-        let test_data = include_str!("../data/test_input.txt");
-        let matches = process_data(test_data);
+        let matches = process_data(&part_one_example_data());
 
         assert_eq!(matches.len(), 4);
-        assert_eq!(matches[0], "mul(2,4)");
-        assert_eq!(matches[1], "mul(5,5)");
-        assert_eq!(matches[2], "mul(11,8)");
-        assert_eq!(matches[3], "mul(8,5)");
+        assert_eq!(matches[0], (2, 4));
+        assert_eq!(matches[1], (5, 5));
+        assert_eq!(matches[2], (11, 8));
+        assert_eq!(matches[3], (8, 5));
     }
 
     #[test]
     fn test_part_one_example() {
-        let matches = process_data(include_str!("../data/test_input.txt"));
-
+        let matches = process_data(&part_one_example_data());
         assert_eq!(part_one_solution(&matches), 161);
     }
 
