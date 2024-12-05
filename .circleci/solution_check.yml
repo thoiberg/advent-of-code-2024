@@ -1,0 +1,35 @@
+version: 2.1
+
+parameters: 
+  day_1:
+    type: boolean
+    default: false
+  day_2:
+    type: boolean
+    default: false
+
+jobs:
+  test:
+    docker:
+      - image: rust:1.81
+    parameters:
+      directory:
+        type: string
+    steps:
+      - checkout
+      - run:
+          name: "Cargo test"
+          command: "cargo test"
+          working_directory: << parameters.directory >>
+
+workflows:
+  day_1:
+    when: << pipeline.parameters.day_1 >>
+    jobs:
+      - test:
+          directory: day_1
+  day_2:
+    when: << pipeline.parameters.day_2 >>
+    jobs:
+    - test:
+        directory: day_2
