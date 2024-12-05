@@ -23,12 +23,14 @@ fn part_two_solution(input: &str) -> u32 {
 }
 
 fn part_two_process_data(input: &str) -> Vec<(u32, u32)> {
-    let re = Regex::new(r"(mul\(\d{1,3},\d{1,3}\))|(don't)|(do)").unwrap();
+    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)|(don't)|(do)").unwrap();
     let mut process_instructions = true;
 
-    re.find_iter(input)
-        .filter_map(|m| {
-            let match_string = m.as_str();
+    re.captures_iter(input)
+        .filter_map(|caps| {
+            // safe as idx 0 is guaranteed to return a non-None value
+            let match_string = caps.get(0).unwrap().as_str();
+
             if match_string == "do" {
                 process_instructions = true;
             } else if match_string == "don't" {
@@ -36,14 +38,16 @@ fn part_two_process_data(input: &str) -> Vec<(u32, u32)> {
             }
 
             if match_string.starts_with("mul") && process_instructions {
-                let chars: Vec<char> = match_string.chars().collect();
-                let num_string: String = (chars[4..chars.len() - 1]).iter().cloned().collect();
-                let vals: Vec<_> = num_string
-                    .split(',')
-                    .map(|f| f.parse::<u32>().unwrap())
-                    .collect();
+                let a = caps
+                    .get(1)
+                    .and_then(|a| a.as_str().parse::<u32>().ok())
+                    .unwrap();
+                let b = caps
+                    .get(2)
+                    .and_then(|b| b.as_str().parse::<u32>().ok())
+                    .unwrap();
 
-                return Some((vals[0], vals[1]));
+                return Some((a, b));
             }
 
             None
