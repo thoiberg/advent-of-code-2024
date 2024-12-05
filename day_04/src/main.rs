@@ -11,6 +11,8 @@ fn main() {
     println!("The Part Two answer is {part_two_answer}");
 }
 
+type Coordinate = (usize, usize);
+
 const DIRECTIONS: [(i8, i8); 8] = [
     (-1, -1), // top left
     (0, -1),  // top
@@ -35,7 +37,7 @@ fn part_two_solution(data: &[Vec<char>]) -> u32 {
 
     // iterate through and find all values that have the same A coord
     // check that the corners are present in the word (doesn't matter what is where)
-    let mut intersecting_words: HashMap<(usize, usize), Vec<Vec<(usize, usize)>>> = HashMap::new();
+    let mut intersecting_words: HashMap<Coordinate, Vec<Vec<Coordinate>>> = HashMap::new();
 
     for xmas in xmas_words {
         if let Some(a) = intersecting_words.get_mut(&xmas[1]) {
@@ -72,8 +74,8 @@ fn part_two_solution(data: &[Vec<char>]) -> u32 {
     xdashmas_count
 }
 
-fn find_xmas_substrings(grid: &[Vec<char>]) -> Vec<Vec<(usize, usize)>> {
-    let mut matching_substr: Vec<Vec<(usize, usize)>> = vec![];
+fn find_xmas_substrings(grid: &[Vec<char>]) -> Vec<Vec<Coordinate>> {
+    let mut matching_substr: Vec<Vec<Coordinate>> = vec![];
 
     for (y, row) in grid.iter().enumerate() {
         for (x, letter) in row.iter().enumerate() {
@@ -113,8 +115,8 @@ fn find_xmas_substrings(grid: &[Vec<char>]) -> Vec<Vec<(usize, usize)>> {
     matching_substr
 }
 
-fn find_mas_substrings(grid: &[Vec<char>]) -> Vec<Vec<(usize, usize)>> {
-    let mut matching_substr: Vec<Vec<(usize, usize)>> = vec![];
+fn find_mas_substrings(grid: &[Vec<char>]) -> Vec<Vec<Coordinate>> {
+    let mut matching_substr: Vec<Vec<Coordinate>> = vec![];
 
     for (y, row) in grid.iter().enumerate() {
         for (x, letter) in row.iter().enumerate() {
@@ -148,9 +150,9 @@ fn find_mas_substrings(grid: &[Vec<char>]) -> Vec<Vec<(usize, usize)>> {
 
 fn next_char(
     grid: &[Vec<char>],
-    current_pos: (usize, usize),
+    current_pos: Coordinate,
     velocity: (i8, i8),
-) -> Option<(&char, (usize, usize))> {
+) -> Option<(&char, Coordinate)> {
     let x_velocity = velocity.0;
     let y_velocity = velocity.1;
     let x = current_pos.0;
