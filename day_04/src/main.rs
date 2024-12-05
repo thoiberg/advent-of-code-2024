@@ -17,29 +17,33 @@ const DIRECTIONS: [(i8, i8); 8] = [
     (1, 1),   // bottom right
 ];
 
-fn part_one_solution(data: &[Vec<char>]) -> u32 {
-    let mut count = 0;
+fn part_one_solution(data: &[Vec<char>]) -> usize {
+    let xmas_words = find_xmas_substrings(data);
+
+    xmas_words.len()
+}
+
+fn find_xmas_substrings(grid: &[Vec<char>]) -> Vec<Vec<(usize, usize)>> {
     let mut matching_substr: Vec<Vec<(usize, usize)>> = vec![];
 
-    for (y, row) in data.iter().enumerate() {
+    for (y, row) in grid.iter().enumerate() {
         for (x, letter) in row.iter().enumerate() {
             if letter == &'X' {
                 for (x_velocity, y_velocity) in DIRECTIONS {
-                    let possible_m = next_char(data, (x, y), (x_velocity, y_velocity));
+                    let possible_m = next_char(grid, (x, y), (x_velocity, y_velocity));
 
                     if let Some((possible_m, m_coordinates)) = possible_m {
                         if possible_m == &'M' {
                             let possible_a =
-                                next_char(data, m_coordinates, (x_velocity, y_velocity));
+                                next_char(grid, m_coordinates, (x_velocity, y_velocity));
 
                             if let Some((possible_a, a_coordinates)) = possible_a {
                                 if possible_a == &'A' {
                                     let possible_s =
-                                        next_char(data, a_coordinates, (x_velocity, y_velocity));
+                                        next_char(grid, a_coordinates, (x_velocity, y_velocity));
 
                                     if let Some((possible_s, s_coordinates)) = possible_s {
                                         if possible_s == &'S' {
-                                            count += 1;
                                             matching_substr.push(vec![
                                                 (x, y),
                                                 m_coordinates,
@@ -57,7 +61,7 @@ fn part_one_solution(data: &[Vec<char>]) -> u32 {
         }
     }
 
-    count
+    matching_substr
 }
 
 fn next_char(
