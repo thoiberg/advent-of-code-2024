@@ -31,12 +31,8 @@ fn part_one_solution(data: &[Vec<char>]) -> usize {
 }
 
 fn part_two_solution(data: &[Vec<char>]) -> u32 {
-    // TODO: reuse searching code, but only look for MAS
-    // then I think the rest of the general idea is correct-ish
     let xmas_words = find_mas_substrings(data);
 
-    // iterate through and find all values that have the same A coord
-    // check that the corners are present in the word (doesn't matter what is where)
     let mut intersecting_words: HashMap<Coordinate, Vec<Vec<Coordinate>>> = HashMap::new();
 
     for xmas in xmas_words {
@@ -66,9 +62,6 @@ fn part_two_solution(data: &[Vec<char>]) -> u32 {
                     xdashmas_count += 1;
                 }
             }
-            // for a
-            // get the corners and check if there is something present in all the corners
-            //   if so then add 1
         });
 
     xdashmas_count
