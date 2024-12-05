@@ -6,10 +6,52 @@ fn main() {
 
     let part_one_answer = part_one_solution(&data);
     println!("Part One Answer is: {part_one_answer}");
+
+    let part_two_answer = part_two_solution(input);
+    println!("Part Two Answer is: {part_two_answer}");
 }
 
 fn part_one_solution(data: &[(u32, u32)]) -> u32 {
     data.iter().map(|(a, b)| a * b).sum()
+}
+
+fn part_two_solution(input: &str) -> u32 {
+    let instructions = part_two_process_data(input);
+
+    instructions
+        .iter()
+        .map(|instruction| {
+            let chars: Vec<char> = instruction.chars().collect();
+            let num_string: String = (chars[4..chars.len() - 1]).iter().cloned().collect();
+            let vals: Vec<_> = num_string
+                .split(',')
+                .map(|f| f.parse::<u32>().unwrap())
+                .collect();
+            vals[0] * vals[1]
+        })
+        .sum()
+}
+
+fn part_two_process_data(input: &str) -> Vec<String> {
+    let re = Regex::new(r"(mul\(\d{1,3},\d{1,3}\))|(don't)|(do)").unwrap();
+    let mut process_instructions = true;
+
+    re.find_iter(input)
+        .filter_map(|m| {
+            let match_string = m.as_str();
+            if match_string == "do" {
+                process_instructions = true;
+            } else if match_string == "don't" {
+                process_instructions = false;
+            }
+
+            if match_string.starts_with("mul") && process_instructions {
+                return Some(match_string.to_owned());
+            }
+
+            None
+        })
+        .collect()
 }
 
 fn process_data(input: &str) -> Vec<(u32, u32)> {
@@ -29,6 +71,10 @@ mod test_super {
 
     fn part_one_example_data() -> String {
         String::from("xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))")
+    }
+
+    fn part_two_example_data() -> String {
+        String::from("xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))")
     }
 
     #[test]
@@ -53,5 +99,27 @@ mod test_super {
         let matches = process_data(include_str!("../data/puzzle_input.txt"));
 
         assert_eq!(part_one_solution(&matches), 190_604_937);
+    }
+
+    #[test]
+    fn test_part_two_process_data_only_finds_enabled_instructions() {
+        let matches = part_two_process_data(&part_two_example_data());
+
+        assert_eq!(matches.len(), 2);
+        assert_eq!(matches[0], "mul(2,4)");
+        assert_eq!(matches[1], "mul(8,5)");
+    }
+
+    #[test]
+    fn test_part_two_example() {
+        assert_eq!(part_two_solution(&part_two_example_data()), 48);
+    }
+
+    #[test]
+    fn test_part_two_answer() {
+        assert_eq!(
+            part_two_solution(include_str!("../data/puzzle_input.txt")),
+            82_857_512
+        );
     }
 }
