@@ -1,5 +1,10 @@
 use std::collections::HashMap;
 
+// REFACTOR
+//  Combine the substring methods into a single one that takes a string, then
+//  returns a Vec of coords
+//  iter over the string,
+
 fn main() {
     let input = include_str!("../data/puzzle_input.txt");
     let data = process_input(input);
