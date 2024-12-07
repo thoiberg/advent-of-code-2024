@@ -47,7 +47,7 @@ jobs:
           working_directory: << parameters.directory >>
       - run:
           name: "Lint"
-          command: "cargo clippy --no-deps -- -Dwarnings"
+          command: "cargo clippy --no-deps --all-targets -- -Dwarnings"
           working_directory: << parameters.directory >>
 
 workflows:
