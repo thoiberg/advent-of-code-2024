@@ -12,27 +12,26 @@ fn main() {
 fn part_one_solution(grid: &Array2<char>) -> usize {
     let mut guard = place_guard(grid);
 
-    let mut still_walking = true;
+    let mut still_on_grid = true;
     let mut visited = HashSet::new();
     visited.insert(guard.position());
 
-    while still_walking {
-        // move the guard
+    while still_on_grid {
         guard.r#move();
 
         visited.insert(guard.position());
 
         let mut front = guard.front();
 
-        while front.is_some()
-            && grid.get(front.unwrap()).is_some()
-            && grid.get(front.unwrap()).unwrap() == &'#'
+        while front
+            .and_then(|pos| grid.get(pos))
+            .is_some_and(|point| point == &'#')
         {
             guard.turn_right();
             front = guard.front();
         }
 
-        still_walking = front.and_then(|f| grid.get(f)).is_some();
+        still_on_grid = front.and_then(|f| grid.get(f)).is_some();
     }
 
     visited.len()
@@ -73,14 +72,9 @@ struct Guard {
 
 impl Guard {
     fn r#move(&mut self) {
-        let next_coords = match self.direction {
-            Direction::Top => (self.y.checked_sub(1), Some(self.x)),
-            Direction::Left => (Some(self.y), self.x.checked_sub(1)),
-            Direction::Bottom => (self.y.checked_add(1), Some(self.x)),
-            Direction::Right => (Some(self.y), self.x.checked_add(1)),
-        };
+        let next_coords = self.front();
 
-        if let (Some(next_y), Some(next_x)) = next_coords {
+        if let Some((next_y, next_x)) = next_coords {
             self.y = next_y;
             self.x = next_x;
         }
