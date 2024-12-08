@@ -1,3 +1,5 @@
+// TODO: Use parallelisation to get under 1sec runtime
+
 fn main() {
     let data = process_input(include_str!("../data/puzzle_input.txt"));
 
@@ -108,12 +110,7 @@ fn run_through_part_two(
     let new_total = match operation {
         Operation::Add => total + next_number,
         Operation::Multiply => total * next_number,
-        Operation::Concatenation => {
-            (total.to_string() + &next_number.to_string())
-                .parse::<u64>()
-                .unwrap()
-            // (total * (next_number.to_string().len() as u64)) + next_number
-        }
+        Operation::Concatenation => concatenate(total, next_number),
     };
 
     if new_total > limit {
@@ -130,6 +127,17 @@ fn run_through_part_two(
     } else {
         vec![new_total]
     }
+}
+
+fn concatenate(a: u64, b: u64) -> u64 {
+    let mut a = a;
+    let mut b_log: u64 = b;
+    while b_log > 0 {
+        b_log /= 10;
+        a *= 10
+    }
+
+    a + b
 }
 
 #[derive(Debug)]
