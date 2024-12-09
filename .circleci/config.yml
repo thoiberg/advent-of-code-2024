@@ -22,3 +22,4 @@ workflows:
             day_05/.+ day_5 true
             day_07/.+ day_7 true
             day_08/.+ day_8 true
+            day_09/.+ day_9 true
