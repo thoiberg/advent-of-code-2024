@@ -8,6 +8,9 @@ fn main() {
 
     let part_one_answer = part_one_solution(&grid, &antennas);
     println!("The Part One answer is: {part_one_answer}");
+
+    let part_two_answer = part_two_solution(&grid, &antennas);
+    println!("The Part Two answer is: {part_two_answer}");
 }
 
 type Map = Array2<char>;
@@ -28,6 +31,40 @@ fn part_one_solution(grid: &Map, antennas: &AntennaLocations) -> usize {
                 if let Some(antinode) = antinode_location(antenna, &distance, grid) {
                     antinodes.insert(antinode);
                 }
+            }
+        }
+    }
+
+    antinodes.len()
+}
+
+fn part_two_solution(grid: &Map, antennas: &AntennaLocations) -> usize {
+    let mut antinodes: HashSet<(usize, usize)> = HashSet::new();
+
+    for antennas in antennas.values() {
+        for antenna in antennas {
+            for other in antennas {
+                if antenna == other {
+                    continue;
+                }
+
+                let distance = antenna_distance(antenna, other);
+
+                let mut next_antinode = antinode_location(antenna, &distance, grid);
+
+                while let Some(antinode) = next_antinode {
+                    antinodes.insert(antinode);
+
+                    next_antinode = antinode_location(&antinode, &distance, grid);
+                }
+            }
+        }
+    }
+
+    for locations in antennas.values() {
+        if locations.len() > 1 {
+            for location in locations {
+                antinodes.insert(*location);
             }
         }
     }
@@ -117,5 +154,29 @@ mod test_super {
         let antennas = antennas(&grid);
 
         assert_eq!(part_one_solution(&grid, &antennas), 332);
+    }
+
+    #[test]
+    fn test_part_two_example() {
+        let grid = process_input(include_str!("../data/test_input.txt"));
+        let antennas = antennas(&grid);
+
+        assert_eq!(part_two_solution(&grid, &antennas), 34);
+    }
+
+    #[test]
+    fn test_part_two_t_frequency() {
+        let grid = process_input(include_str!("../data/t_frequency_test_input.txt"));
+        let antennas = antennas(&grid);
+
+        assert_eq!(part_two_solution(&grid, &antennas), 9);
+    }
+
+    #[test]
+    fn test_part_two_solution() {
+        let grid = process_input(include_str!("../data/puzzle_input.txt"));
+        let antennas = antennas(&grid);
+
+        assert_eq!(part_two_solution(&grid, &antennas), 1174);
     }
 }
