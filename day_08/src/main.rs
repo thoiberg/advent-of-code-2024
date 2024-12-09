@@ -43,6 +43,9 @@ fn part_two_solution(grid: &Map, antennas: &AntennaLocations) -> usize {
 
     for antennas in antennas.values() {
         for antenna in antennas {
+            if antennas.len() > 1 {
+                antinodes.insert(*antenna);
+            }
             for other in antennas {
                 if antenna == other {
                     continue;
@@ -57,14 +60,6 @@ fn part_two_solution(grid: &Map, antennas: &AntennaLocations) -> usize {
 
                     next_antinode = antinode_location(&antinode, &distance, grid);
                 }
-            }
-        }
-    }
-
-    for locations in antennas.values() {
-        if locations.len() > 1 {
-            for location in locations {
-                antinodes.insert(*location);
             }
         }
     }
