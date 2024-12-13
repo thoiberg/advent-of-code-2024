@@ -25,6 +25,9 @@ parameters:
   day_10:
     type: boolean
     default: false
+  day_11:
+    type: boolean
+    default: false
 
 jobs:
   test:
@@ -113,3 +116,10 @@ workflows:
         directory: day_10
     - lint:
           directory: day_10
+  day_11:
+    when: << pipeline.parameters.day_11 >>
+    jobs:
+    - test:
+        directory: day_11
+    - lint:
+          directory: day_11
