@@ -7,6 +7,9 @@ fn main() {
 
     let part_one_answer = part_one_solution(&data);
     println!("The Part One answer is {part_one_answer}");
+
+    let part_two_answer = part_two_solution(&data);
+    println!("The Part Two answer is {part_two_answer}");
 }
 
 type Coordinate = (usize, usize);
@@ -51,6 +54,42 @@ fn part_one_solution(map: &Array2<u32>) -> usize {
 
             unique_courses.len()
         })
+        .sum()
+}
+
+fn part_two_solution(map: &Array2<u32>) -> usize {
+    let mut trailhead_courses: HashMap<Coordinate, Vec<Vec<Coordinate>>> = HashMap::new();
+    let mut possible_courses = find_trailhead_starts(map);
+
+    while let Some(course) = possible_courses.pop() {
+        let first_step = course.first().unwrap();
+        let last_step = course.last().unwrap();
+        let value = map.get(*last_step).unwrap();
+
+        if value == &9 {
+            if let Some(courses_from_same_start) = trailhead_courses.get_mut(first_step) {
+                courses_from_same_start.push(course.clone());
+            } else {
+                trailhead_courses.insert(*first_step, vec![course.clone()]);
+            }
+
+            continue;
+        }
+
+        cardinal_neighbours(*last_step)
+            .iter()
+            .filter_map(|coord| map.get(*coord).map(|value| (coord, value)))
+            .filter(|(_, step)| step == &&(value + 1))
+            .for_each(|(coords, _)| {
+                let mut new_course = course.clone();
+                new_course.push(*coords);
+                possible_courses.push(new_course);
+            });
+    }
+
+    trailhead_courses
+        .values()
+        .map(|courses| courses.len())
         .sum()
 }
 
@@ -139,5 +178,19 @@ mod test_super {
         let data = process_input(include_str!("../data/puzzle_input.txt"));
 
         assert_eq!(part_one_solution(&data), 652);
+    }
+
+    #[test]
+    fn test_part_two_example() {
+        let data = process_input(include_str!("../data/large_test_input.txt"));
+
+        assert_eq!(part_two_solution(&data), 81);
+    }
+
+    #[test]
+    fn test_part_two_answer() {
+        let data = process_input(include_str!("../data/puzzle_input.txt"));
+
+        assert_eq!(part_two_solution(&data), 1432);
     }
 }
