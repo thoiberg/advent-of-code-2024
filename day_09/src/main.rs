@@ -32,6 +32,22 @@ fn part_one_solution(mut disk_map: Vec<i32>) -> usize {
         .sum()
 }
 
+#[allow(dead_code)]
+fn part_two_solution() -> usize {
+    // want to approach this very differently to part one
+    // thinking to either have a custom struct with the id and length pros
+    // or a Vec<Vec<i32>>
+    // either way get the last val in the list, start from the beginning and look
+    // for a empty space with >= to the space of the len
+    // if found, swap the contiguous blocks
+    // if back to the current index do nothing
+    // reset the incr and repeat for each "file" from the end until reach the start of the array
+
+    // to sum might need to flatten all arrays/provide custom method on struct
+
+    todo!()
+}
+
 fn process_input(input: &str) -> Vec<i32> {
     let mut disk_map: Vec<i32> = vec![];
 
