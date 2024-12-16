@@ -8,21 +8,41 @@ fn main() {
 
     let part_one_answer = part_one_solution(&machines);
     println!("The answer to Part One is {part_one_answer}");
+
+    let part_two_answer = part_two_solution(&machines);
+    println!("The answer to Part Two is {part_two_answer}");
 }
 
 fn part_one_solution(machines: &[Machine]) -> i64 {
-    machines.iter().map(determine_presses).sum()
+    machines
+        .iter()
+        .map(|machine| determine_presses(machine, 0))
+        .sum()
 }
 
-fn determine_presses(machine: &Machine) -> i64 {
-    let determinant = machine.ax * machine.by - machine.ay * machine.bx;
-    let a_presses = (machine.px * machine.by - machine.py * machine.bx) / determinant;
-    let b_presses = (machine.ax * machine.py - machine.ay * machine.px) / determinant;
+fn part_two_solution(machines: &[Machine]) -> i64 {
+    machines
+        .iter()
+        .map(|machine| determine_presses(machine, 10_000_000_000_000))
+        .sum()
+}
+
+fn determine_presses(machine: &Machine, offset: i64) -> i64 {
+    let ax = machine.ax;
+    let ay = machine.ay;
+    let bx = machine.bx;
+    let by = machine.by;
+    let py = machine.py + offset;
+    let px = machine.px + offset;
+
+    let determinant = ax * by - ay * bx;
+    let a_presses = (px * by - py * bx) / determinant;
+    let b_presses = (ax * py - ay * px) / determinant;
 
     if (
-        machine.ay * a_presses + machine.by * b_presses,
-        machine.ax * a_presses + machine.bx * b_presses,
-    ) == (machine.py, machine.px)
+        ay * a_presses + by * b_presses,
+        ax * a_presses + bx * b_presses,
+    ) == (py, px)
     {
         (3 * a_presses) + b_presses
     } else {
@@ -91,5 +111,12 @@ mod test_super {
         let machines = process_input(include_str!("../data/puzzle_input.txt"));
 
         assert_eq!(part_one_solution(&machines), 36_571);
+    }
+
+    #[test]
+    fn test_part_two_answer() {
+        let machines = process_input(include_str!("../data/puzzle_input.txt"));
+
+        assert_eq!(part_two_solution(&machines), 85_527_711_500_010);
     }
 }
