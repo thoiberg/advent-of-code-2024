@@ -10,25 +10,24 @@ fn main() {
     println!("The answer to Part One is {part_one_answer}");
 }
 
-fn part_one_solution(machines: &[Machine]) -> i32 {
-    machines
-        .iter()
-        .map(|machine| {
-            let determinant = machine.ax * machine.by - machine.ay * machine.bx;
-            let a_presses = (machine.px * machine.by - machine.py * machine.bx) / determinant;
-            let b_presses = (machine.ax * machine.py - machine.ay * machine.px) / determinant;
+fn part_one_solution(machines: &[Machine]) -> i64 {
+    machines.iter().map(determine_presses).sum()
+}
 
-            if (
-                machine.ay * a_presses + machine.by * b_presses,
-                machine.ax * a_presses + machine.bx * b_presses,
-            ) == (machine.py, machine.px)
-            {
-                (3 * a_presses) + b_presses
-            } else {
-                0
-            }
-        })
-        .sum()
+fn determine_presses(machine: &Machine) -> i64 {
+    let determinant = machine.ax * machine.by - machine.ay * machine.bx;
+    let a_presses = (machine.px * machine.by - machine.py * machine.bx) / determinant;
+    let b_presses = (machine.ax * machine.py - machine.ay * machine.px) / determinant;
+
+    if (
+        machine.ay * a_presses + machine.by * b_presses,
+        machine.ax * a_presses + machine.bx * b_presses,
+    ) == (machine.py, machine.px)
+    {
+        (3 * a_presses) + b_presses
+    } else {
+        0
+    }
 }
 
 fn process_input(input: &str) -> Vec<Machine> {
@@ -43,24 +42,24 @@ fn process_input(input: &str) -> Vec<Machine> {
             let caps = re.captures(machine).unwrap();
 
             Machine {
-                ax: caps.name("ax").unwrap().as_str().parse::<i32>().unwrap(),
-                ay: caps.name("ay").unwrap().as_str().parse::<i32>().unwrap(),
-                bx: caps.name("bx").unwrap().as_str().parse::<i32>().unwrap(),
-                by: caps.name("by").unwrap().as_str().parse::<i32>().unwrap(),
-                px: caps.name("px").unwrap().as_str().parse::<i32>().unwrap(),
-                py: caps.name("py").unwrap().as_str().parse::<i32>().unwrap(),
+                ax: caps.name("ax").unwrap().as_str().parse::<i64>().unwrap(),
+                ay: caps.name("ay").unwrap().as_str().parse::<i64>().unwrap(),
+                bx: caps.name("bx").unwrap().as_str().parse::<i64>().unwrap(),
+                by: caps.name("by").unwrap().as_str().parse::<i64>().unwrap(),
+                px: caps.name("px").unwrap().as_str().parse::<i64>().unwrap(),
+                py: caps.name("py").unwrap().as_str().parse::<i64>().unwrap(),
             }
         })
         .collect()
 }
 
 struct Machine {
-    ax: i32,
-    ay: i32,
-    bx: i32,
-    by: i32,
-    px: i32,
-    py: i32,
+    ax: i64,
+    ay: i64,
+    bx: i64,
+    by: i64,
+    px: i64,
+    py: i64,
 }
 
 #[cfg(test)]
