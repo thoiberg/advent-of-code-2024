@@ -1,24 +1,29 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use ndarray::Array2;
 
 fn main() {
     let farm = process_input(include_str!("../data/puzzle_input.txt"));
+    let plots = divide_into_plots(&farm);
 
-    let part_one_answer = part_one_solution(&farm);
+    let part_one_answer = part_one_solution(&plots);
     println!("The Part One answer is {part_one_answer}");
 }
 
 type Coordinate = (usize, usize); // (y, x)
-type Plant = (Coordinate, char);
+type Plant = (Coordinate, char, Direction);
 
-fn part_one_solution(farm: &Array2<char>) -> usize {
-    let farms = divide_into_plots(farm);
-
-    farms.iter().map(|farm| farm.fence_price()).sum()
+fn part_one_solution(gardens: &[Garden]) -> usize {
+    gardens.iter().map(|garden| garden.fence_price()).sum()
 }
 
 fn divide_into_plots(farm: &Array2<char>) -> Vec<Garden> {
+    let full_sides = HashSet::from([
+        Direction::Up,
+        Direction::Left,
+        Direction::Bottom,
+        Direction::Right,
+    ]);
     let mut gardens = vec![];
 
     let mut other_shape_coords_to_check: Vec<Coordinate> = Vec::new();
@@ -45,22 +50,23 @@ fn divide_into_plots(farm: &Array2<char>) -> Vec<Garden> {
             let (same_region, different_region): (Vec<Plant>, Vec<Plant>) =
                 find_neighbours(farm, &plant)
                     .iter()
-                    .partition(|(_, plant_type)| plant_type == name);
+                    .partition(|(_, plant_type, _)| plant_type == name);
 
-            garden.perimeter += 4 - same_region.len();
+            let perimeters: HashSet<_> = same_region
+                .iter()
+                .map(|(_, _, direction)| *direction)
+                .collect();
 
-            if same_region.len() == 4 {
-                garden.areas.insert(plant)
-            } else {
-                garden.perimeters.insert(plant)
-            };
+            garden
+                .plants
+                .insert(plant, full_sides.difference(&perimeters).cloned().collect());
 
-            same_region.into_iter().for_each(|(coord, _)| {
+            same_region.into_iter().for_each(|(coord, _, _)| {
                 if !checked_coords.contains(&coord) {
                     current_shape_coords_to_check.push(coord);
                 }
             });
-            different_region.into_iter().for_each(|(coord, _)| {
+            different_region.into_iter().for_each(|(coord, _, _)| {
                 if !checked_coords.contains(&coord) {
                     other_shape_coords_to_check.push(coord);
                 }
@@ -73,17 +79,20 @@ fn divide_into_plots(farm: &Array2<char>) -> Vec<Garden> {
     gardens
 }
 
-fn find_neighbours(farm: &Array2<char>, plant: &Coordinate) -> Vec<(Coordinate, char)> {
+fn find_neighbours(
+    farm: &Array2<char>,
+    plant: &Coordinate,
+) -> HashSet<(Coordinate, char, Direction)> {
     [
-        (plant.0.checked_sub(1), Some(plant.1)), // top
-        (Some(plant.0), plant.1.checked_add(1)), // right
-        (plant.0.checked_add(1), Some(plant.1)), // bottom
-        (Some(plant.0), plant.1.checked_sub(1)), // left
+        (plant.0.checked_sub(1), Some(plant.1), Direction::Up), // top
+        (Some(plant.0), plant.1.checked_add(1), Direction::Right), // right
+        (plant.0.checked_add(1), Some(plant.1), Direction::Bottom), // bottom
+        (Some(plant.0), plant.1.checked_sub(1), Direction::Left), // left
     ]
     .into_iter()
     .filter_map(|coords| {
-        if let (Some(y), Some(x)) = coords {
-            farm.get((y, x)).map(|plant| ((y, x), *plant))
+        if let (Some(y), Some(x), direction) = coords {
+            farm.get((y, x)).map(|plant| ((y, x), *plant, direction))
         } else {
             None
         }
@@ -100,26 +109,37 @@ fn process_input(input: &str) -> Array2<char> {
     Array2::from_shape_vec((y, x), chars.iter().flatten().cloned().collect()).unwrap()
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+enum Direction {
+    Up,
+    Right,
+    Bottom,
+    Left,
+}
+
 struct Garden {
-    areas: HashSet<Coordinate>,
-    perimeters: HashSet<Coordinate>,
-    perimeter: usize,
     #[allow(dead_code)]
     region: char,
+    plants: HashMap<Coordinate, HashSet<Direction>>,
 }
 
 impl Garden {
     fn new(region: char) -> Self {
         Self {
-            areas: HashSet::new(),
-            perimeters: HashSet::new(),
-            perimeter: 0,
+            plants: HashMap::new(),
             region,
         }
     }
 
+    fn perimeter(&self) -> usize {
+        self.plants
+            .values()
+            .map(|perimeters| perimeters.len())
+            .sum()
+    }
+
     fn fence_price(&self) -> usize {
-        (self.areas.len() + self.perimeters.len()) * self.perimeter
+        self.plants.len() * self.perimeter()
     }
 }
 
@@ -130,8 +150,9 @@ mod test_super {
     #[test]
     fn test_part_one_small_example() {
         let farm = process_input(include_str!("../data/small_test_input.txt"));
+        let plots = divide_into_plots(&farm);
 
-        assert_eq!(part_one_solution(&farm), 140);
+        assert_eq!(part_one_solution(&plots), 140);
     }
 
     #[test]
@@ -144,33 +165,28 @@ mod test_super {
 
         let a_plot = &plots[0];
         assert_eq!(a_plot.region, 'A');
-        assert_eq!(a_plot.areas.len(), 0);
-        assert_eq!(a_plot.perimeters.len(), 4);
-        assert_eq!(a_plot.perimeter, 10);
+        assert_eq!(a_plot.plants.len(), 4);
+        assert_eq!(a_plot.perimeter(), 10);
 
         let d_plot = &plots[1];
         assert_eq!(d_plot.region, 'D');
-        assert_eq!(d_plot.areas.len(), 0);
-        assert_eq!(d_plot.perimeters.len(), 1);
-        assert_eq!(d_plot.perimeter, 4);
+        assert_eq!(d_plot.plants.len(), 1);
+        assert_eq!(d_plot.perimeter(), 4);
 
         let c_plot = &plots[2];
         assert_eq!(c_plot.region, 'C');
-        assert_eq!(c_plot.areas.len(), 0);
-        assert_eq!(c_plot.perimeters.len(), 4);
-        assert_eq!(c_plot.perimeter, 10);
+        assert_eq!(c_plot.plants.len(), 4);
+        assert_eq!(c_plot.perimeter(), 10);
 
         let e_plot = &plots[3];
         assert_eq!(e_plot.region, 'E');
-        assert_eq!(e_plot.areas.len(), 0);
-        assert_eq!(e_plot.perimeters.len(), 3);
-        assert_eq!(e_plot.perimeter, 8);
+        assert_eq!(e_plot.plants.len(), 3);
+        assert_eq!(e_plot.perimeter(), 8);
 
         let b_plot = &plots[4];
         assert_eq!(b_plot.region, 'B');
-        assert_eq!(b_plot.areas.len(), 0);
-        assert_eq!(b_plot.perimeters.len(), 4);
-        assert_eq!(b_plot.perimeter, 8);
+        assert_eq!(b_plot.plants.len(), 4);
+        assert_eq!(b_plot.perimeter(), 8);
     }
 
     #[test]
@@ -203,28 +219,35 @@ mod test_super {
         assert_eq!(neighbours.len(), 3);
         assert_eq!(
             neighbours,
-            vec![((0, 0), 'A'), ((1, 1), 'B'), ((2, 0), 'B')]
+            HashSet::from([
+                ((0, 0), 'A', Direction::Up),
+                ((1, 1), 'B', Direction::Right),
+                ((2, 0), 'B', Direction::Bottom)
+            ])
         );
     }
 
     #[test]
     fn test_part_one_nested_example() {
         let farm = process_input(include_str!("../data/nested_test_input.txt"));
+        let plots = divide_into_plots(&farm);
 
-        assert_eq!(part_one_solution(&farm), 772);
+        assert_eq!(part_one_solution(&plots), 772);
     }
 
     #[test]
     fn test_part_one_large_example() {
         let farm = process_input(include_str!("../data/large_test_input.txt"));
+        let plots = divide_into_plots(&farm);
 
-        assert_eq!(part_one_solution(&farm), 1930);
+        assert_eq!(part_one_solution(&plots), 1930);
     }
 
     #[test]
     fn test_part_one_answer() {
         let farm = process_input(include_str!("../data/puzzle_input.txt"));
+        let plots = divide_into_plots(&farm);
 
-        assert_eq!(part_one_solution(&farm), 1_319_878);
+        assert_eq!(part_one_solution(&plots), 1_319_878);
     }
 }
