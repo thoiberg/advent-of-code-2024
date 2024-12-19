@@ -163,30 +163,30 @@ mod test_super {
 
         assert_eq!(plots.len(), 5);
 
-        let a_plot = &plots[0];
+        let a_plot = plots.iter().find(|garden| garden.region == 'A').unwrap();
         assert_eq!(a_plot.region, 'A');
         assert_eq!(a_plot.plants.len(), 4);
         assert_eq!(a_plot.perimeter(), 10);
 
-        let d_plot = &plots[1];
-        assert_eq!(d_plot.region, 'D');
-        assert_eq!(d_plot.plants.len(), 1);
-        assert_eq!(d_plot.perimeter(), 4);
+        let b_plot = plots.iter().find(|garden| garden.region == 'B').unwrap();
+        assert_eq!(b_plot.region, 'B');
+        assert_eq!(b_plot.plants.len(), 4);
+        assert_eq!(b_plot.perimeter(), 8);
 
-        let c_plot = &plots[2];
+        let c_plot = plots.iter().find(|garden| garden.region == 'C').unwrap();
         assert_eq!(c_plot.region, 'C');
         assert_eq!(c_plot.plants.len(), 4);
         assert_eq!(c_plot.perimeter(), 10);
 
-        let e_plot = &plots[3];
+        let d_plot = plots.iter().find(|garden| garden.region == 'D').unwrap();
+        assert_eq!(d_plot.region, 'D');
+        assert_eq!(d_plot.plants.len(), 1);
+        assert_eq!(d_plot.perimeter(), 4);
+
+        let e_plot = plots.iter().find(|garden| garden.region == 'E').unwrap();
         assert_eq!(e_plot.region, 'E');
         assert_eq!(e_plot.plants.len(), 3);
         assert_eq!(e_plot.perimeter(), 8);
-
-        let b_plot = &plots[4];
-        assert_eq!(b_plot.region, 'B');
-        assert_eq!(b_plot.plants.len(), 4);
-        assert_eq!(b_plot.perimeter(), 8);
     }
 
     #[test]
